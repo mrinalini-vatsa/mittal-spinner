@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Worker {
+  id          String       @id @default(cuid())
+  name        String
+  workerCode  String       @unique
+  role        String
+  joiningDate DateTime
+  createdAt   DateTime     @default(now())
+  attendance  Attendance[]
+}
+
+model Attendance {
+  id        String   @id @default(cuid())
+  workerId  String
+  date      DateTime
+  status    String
+  markedBy  String
+  createdAt DateTime @default(now())
+  worker    Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+
+  @@unique([workerId, date])
+}
+
+model InventoryItem {
+  id        String         @id @default(cuid())
+  name      String
+  sku       String         @unique
+  quantity  Int
+  createdAt DateTime       @default(now())
+  logs      InventoryLog[]
+}
+
+model InventoryLog {
+  id        String        @id @default(cuid())
+  itemId    String
+  change    Int
+  type      String
+  updatedBy String
+  createdAt DateTime      @default(now())
+  item      InventoryItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id           String     @id @default(cuid())
+  referenceId  String     @unique
+  customerName String
+  product      String
+  quantity     Int
+  status       String
+  createdAt    DateTime   @default(now())
+  logs         OrderLog[]
+}
+
+model OrderLog {
+  id        String   @id @default(cuid())
+  orderId   String
+  status    String
+  updatedBy String
+  createdAt DateTime @default(now())
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Inquiry {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+}
